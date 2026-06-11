@@ -1,6 +1,6 @@
 # Sync — Meaningful Networking at Tech Events
 
-Sync helps people at tech events move beyond surface-level small talk and build genuine connections. It matches attendees intelligently, gives them conversation starters, and surfaces who actually learned something from whom.
+Sync helps people at tech events move beyond surface-level small talk and build genuine connections. It matches attendees randomly, gives them conversation starters, and surfaces who actually learned something from whom.
 
 ---
 
