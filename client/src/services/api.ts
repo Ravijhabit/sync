@@ -25,10 +25,16 @@ http.interceptors.response.use(
   (res) => res,
   (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      useUserStore.getState().clearUser();
-      useEventStore.getState().setEvent(null);
-      useMatchStore.getState().clearMatch();
-      window.location.href = '/';
+      // /users/me is called on startup to check auth — a 401 there is expected
+      // for unauthenticated users and must be handled by the caller, not here.
+      // Redirecting here would cause an infinite reload loop on the homepage.
+      const isAuthCheck = error.config?.url === '/users/me';
+      if (!isAuthCheck) {
+        useUserStore.getState().clearUser();
+        useEventStore.getState().setEvent(null);
+        useMatchStore.getState().clearMatch();
+        window.location.href = '/';
+      }
     }
     return Promise.reject(error);
   }
