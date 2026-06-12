@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.title {
+  margin: 0;
+}
+
+.description {
+  color: #605e5c;
+  margin: 0;
+  text-align: center;
+}
+
+.waitingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.waitingText {
+  color: #605e5c;
+  margin: 0;
+}

@@ -1,0 +1,49 @@
+.form {
+  max-width: 480px;
+}
+
+.title {
+  margin-bottom: 16px;
+}
+
+.fieldGroup {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.dropDown {
+  width: 100%;
+}
+
+.interestsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.interestTag {
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.interestTagSelected {
+  border-color: #0078d4;
+  background: #0078d4;
+  color: #fff;
+}
+
+.error {
+  color: #d83b01;
+  margin-bottom: 8px;
+}

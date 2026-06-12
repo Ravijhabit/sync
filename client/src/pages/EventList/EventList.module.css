@@ -1,0 +1,28 @@
+.page {
+  padding: 2rem;
+}
+
+.title {
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 4rem;
+}
+
+.error {
+  padding: 2rem;
+  color: #d83b01;
+}
+
+.empty {
+  color: #605e5c;
+}

@@ -1,0 +1,58 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f2f1;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 520px;
+}
+
+.title {
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #605e5c;
+  margin-bottom: 24px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  gap: 8px;
+}
+
+.dividerLine {
+  flex: 1;
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 0;
+}
+
+.dividerText {
+  color: #605e5c;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.authButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.authButton {
+  flex: 1;
+}
+
+.backButton {
+  margin-top: 16px;
+}

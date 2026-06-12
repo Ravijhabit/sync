@@ -1,0 +1,28 @@
+.card {
+  width: 320px;
+  margin: 8px;
+}
+
+.statusBadge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusUpcoming  { background: #0078d4; }
+.statusOngoing   { background: #107c10; }
+.statusClosing   { background: #d83b01; }
+.statusCompleted { background: #605e5c; }
+
+.meta {
+  margin: 4px 0;
+}
+
+.description {
+  margin: 4px 0;
+  color: #605e5c;
+}

@@ -1,0 +1,87 @@
+.card {
+  max-width: 520px;
+  margin: 24px auto;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  border-top: 1px solid #edebe9;
+  padding-top: 16px;
+}
+
+.submitSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.textArea {
+  width: 100%;
+}
+
+.success {
+  padding: 16px;
+  background: #dff6dd;
+  border-radius: 6px;
+  color: #107c10;
+}
+
+.learningQuote {
+  background: #f3f2f1;
+  border-radius: 6px;
+  padding: 12px 16px;
+  border-left: 3px solid #0078d4;
+}
+
+.learningText {
+  margin: 0 0 8px;
+  font-style: italic;
+}
+
+.learningJustification {
+  margin: 0;
+  color: #605e5c;
+  font-size: 13px;
+}
+
+.ratingRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.correctRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meaningfulRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meaningfulLabel {
+  font-weight: 500;
+}
+
+.savedNote {
+  color: #605e5c;
+  font-size: 13px;
+}

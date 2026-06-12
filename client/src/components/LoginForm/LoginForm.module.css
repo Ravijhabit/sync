@@ -1,0 +1,12 @@
+.form {
+  max-width: 480px;
+}
+
+.title {
+  margin-bottom: 16px;
+}
+
+.error {
+  color: #d83b01;
+  margin-bottom: 8px;
+}

@@ -1,0 +1,39 @@
+.page {
+  min-height: 100vh;
+  background: #f3f2f1;
+}
+
+.offlineBanner {
+  background: #fde7e9;
+  color: #d83b01;
+  padding: 10px 24px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.attendeeCount {
+  color: #605e5c;
+  margin-bottom: 16px;
+}
+
+.closingMessage {
+  text-align: center;
+  color: #d83b01;
+  font-weight: 500;
+}
+
+.postConversationSection {
+  margin-top: 32px;
+}
+
+.loading {
+  padding: 4rem;
+  text-align: center;
+}

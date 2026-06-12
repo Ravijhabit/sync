@@ -1,0 +1,114 @@
+.page {
+  min-height: 100vh;
+  background: #f3f2f1;
+}
+
+.main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.heroTitle {
+  margin: 0 0 8px;
+}
+
+.heroSubtitle {
+  color: #605e5c;
+  margin: 0;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  margin-bottom: 16px;
+}
+
+.ratingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ratingCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reviewerName {
+  font-weight: 600;
+}
+
+.reviewerMeta {
+  color: #605e5c;
+  margin-left: 8px;
+  font-size: 13px;
+}
+
+.scoreGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0078d4;
+}
+
+.correctBadge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.correctBadgeTrue {
+  background: #dff6dd;
+  color: #107c10;
+}
+
+.correctBadgeFalse {
+  background: #fde7e9;
+  color: #d83b01;
+}
+
+.learningText {
+  margin: 0 0 8px;
+  font-style: italic;
+}
+
+.justificationText {
+  margin: 0 0 8px;
+  color: #605e5c;
+  font-size: 13px;
+}
+
+.feedbackText {
+  margin: 0;
+  font-size: 13px;
+}
+
+.matchDate {
+  margin: 8px 0 0;
+  color: #a19f9d;
+  font-size: 12px;
+}
+
+.loading {
+  padding: 4rem;
+  text-align: center;
+}
+
+.empty {
+  color: #605e5c;
+}

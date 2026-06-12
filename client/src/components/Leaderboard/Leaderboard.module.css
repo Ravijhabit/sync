@@ -1,0 +1,48 @@
+.loading {
+  padding: 24px;
+}
+
+.grid {
+  cursor: pointer;
+}
+
+.avatarCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatarImg {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarInitial {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0078d4;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.dialogContent {
+  padding: 16px;
+  min-width: 280px;
+}
+
+.dialogStat {
+  margin-bottom: 8px;
+}
+
+.dialogSection {
+  margin-top: 12px;
+  border-top: 1px solid #edebe9;
+  padding-top: 12px;
+}

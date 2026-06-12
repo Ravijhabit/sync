@@ -1,0 +1,9 @@
+.fallback {
+  padding: 2rem;
+  text-align: center;
+}
+
+.fallback h2 {
+  margin-bottom: 1rem;
+  color: #d83b01;
+}

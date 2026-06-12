@@ -1,0 +1,11 @@
+.cancelledState {
+  padding: 24px;
+  text-align: center;
+  color: #d83b01;
+}
+
+.completedState {
+  padding: 24px;
+  text-align: center;
+  color: #107c10;
+}
