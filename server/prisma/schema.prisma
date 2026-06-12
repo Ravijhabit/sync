@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Enums ───────────────────────────
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  CLOSING
+  COMPLETED
+}
+
+enum UserEventStatus {
+  IDLE
+  ENGAGED
+  OFFLINE
+}
+
+enum MatchStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PromptDepth {
+  SURFACE
+  MID
+  DEEP
+}
+
+enum PromptCategory {
+  FAILURE
+  CONVICTION
+  SURPRISE
+  CRAFT
+  IMPACT
+  FUTURE
+  UNLEARNING
+  PEOPLE
+}
+
+enum PromptEnergy {
+  REFLECTIVE
+  ENERGISING
+  PROVOCATIVE
+  COLLABORATIVE
+}
+
+enum PromptAudience {
+  ANY
+  TECHNICAL
+  NON_TECHNICAL
+  CROSS_FUNCTIONAL
+}
+
+// ─────────────────────────── Models ───────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  role      String
+  company   String
+  bio       String   @default("")
+  interests String[]
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  userEvents    UserEvent[]
+  matchesAs1    Match[]     @relation("MatchUser1")
+  matchesAs2    Match[]     @relation("MatchUser2")
+  learnings     Learning[]  @relation("LearnerLearnings")
+  reviewTargets Learning[]  @relation("TargetLearnings")
+
+  @@map("users")
+}
+
+model Event {
+  id          String      @id @default(uuid())
+  name        String
+  venue       String
+  description String      @default("")
+  startTime   DateTime
+  endTime     DateTime
+  status      EventStatus @default(UPCOMING)
+
+  userEvents UserEvent[]
+  matches    Match[]
+
+  @@map("events")
+}
+
+model UserEvent {
+  id       String          @id @default(uuid())
+  userId   String
+  eventId  String
+  status   UserEventStatus @default(IDLE)
+  joinedAt DateTime        @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+  @@index([eventId, status])
+  @@map("user_events")
+}
+
+model Match {
+  id              String      @id @default(uuid())
+  eventId         String
+  user1Id         String
+  user2Id         String
+  status          MatchStatus @default(PENDING)
+  promptId        String
+  user1Meaningful Boolean?
+  user2Meaningful Boolean?
+  createdAt       DateTime    @default(now())
+  startedAt       DateTime?
+  completedAt     DateTime?
+
+  event     Event              @relation(fields: [eventId], references: [id])
+  user1     User               @relation("MatchUser1", fields: [user1Id], references: [id])
+  user2     User               @relation("MatchUser2", fields: [user2Id], references: [id])
+  prompt    ConversationPrompt @relation(fields: [promptId], references: [id])
+  learnings Learning[]
+
+  @@index([eventId])
+  @@index([eventId, user1Id, user2Id])
+  @@map("matches")
+}
+
+model ConversationPrompt {
+  id       String         @id @default(uuid())
+  text     String
+  followUp String
+  category PromptCategory
+  depth    PromptDepth
+  energy   PromptEnergy
+  audience PromptAudience
+  tags     String[]
+
+  matches Match[]
+
+  @@map("conversation_prompts")
+}
+
+model Learning {
+  id            String    @id @default(uuid())
+  matchId       String
+  learnerId     String
+  targetId      String
+  content       String
+  justification String
+  rating        Int?
+  feedback      String?
+  isCorrect     Boolean?
+  submittedAt   DateTime  @default(now())
+  reviewedAt    DateTime?
+
+  match    Match @relation(fields: [matchId], references: [id])
+  learner  User  @relation("LearnerLearnings", fields: [learnerId], references: [id])
+  target   User  @relation("TargetLearnings", fields: [targetId], references: [id])
+
+  @@unique([matchId, learnerId])
+  @@index([targetId])
+  @@index([matchId])
+  @@map("learnings")
+}
