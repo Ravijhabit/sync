@@ -110,6 +110,7 @@ export interface JoinBody {
 
 export interface LoginBody {
   email: string;
+  eventId?: string;
 }
 
 export interface SubmitLearningBody {

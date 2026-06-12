@@ -57,7 +57,7 @@ export const UserService = {
         const activeMatch = await prisma.match.findFirst({
           where: {
             eventId,
-            status: 'ACTIVE',
+            status: { in: ['ACTIVE', 'PENDING'] },
             OR: [{ user1Id: userId }, { user2Id: userId }],
           },
         });

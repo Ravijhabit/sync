@@ -53,7 +53,7 @@ export type ServerToClientEvents = {
 };
 
 export type ClientToServerEvents = {
-  'user:set_idle': (payload: { userId: string }) => void;
+  'user:set_idle': (payload: { userId: string; eventId: string }) => void;
   'user:found_partner': (payload: { matchId: string }) => void;
   'user:end_conversation': (payload: { matchId: string }) => void;
 };

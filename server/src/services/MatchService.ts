@@ -11,46 +11,50 @@ import type {
 
 type IoType = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
+// Tracks which users have confirmed a PENDING match before it transitions to ACTIVE.
+// Keyed by matchId; value is the set of userIds who have confirmed.
+// In-memory is fine for single-server demo deployments.
+const pendingConfirmations = new Map<string, Set<string>>();
+
 export const MatchService = {
   async confirmMatch(matchId: string, userId: string, io: IoType) {
     return withTelemetry('MatchService', 'confirmMatch', { matchId, userId }, async () => {
       const match = await prisma.match.findUnique({
         where: { id: matchId },
-        include: {
-          prompt: true,
-          user1: { select: { role: true, company: true, interests: true } },
-          user2: { select: { role: true, company: true, interests: true } },
-        },
+        include: { prompt: true },
       });
       if (!match) throw new AppError(404, 'MATCH_NOT_FOUND', `Match ${matchId} not found`);
       if (match.status !== 'PENDING') return;
 
+      // Record this user's confirmation
+      const confirmSet = pendingConfirmations.get(matchId) ?? new Set<string>();
+      confirmSet.add(userId);
+      pendingConfirmations.set(matchId, confirmSet);
+
       const isUser1 = match.user1Id === userId;
       const partnerId = isUser1 ? match.user2Id : match.user1Id;
 
+      // Notify the partner that this user is ready
       io.to(`user:${partnerId}`).emit('match:partner_ready', { matchId });
 
-      const pendingPartnerCheck = await prisma.match.findUnique({ where: { id: matchId } });
-      const partnerAlreadyConfirmed = pendingPartnerCheck?.status === 'ACTIVE';
+      // Only activate when both users have confirmed
+      if (!confirmSet.has(match.user1Id) || !confirmSet.has(match.user2Id)) return;
 
-      if (partnerAlreadyConfirmed) return;
+      // Both confirmed — clean up tracking and activate the match
+      pendingConfirmations.delete(matchId);
 
       const updatedMatch = await prisma.match.update({
-        where: { id: matchId, status: 'PENDING' },
+        where: { id: matchId },
         data: { status: 'ACTIVE', startedAt: new Date() },
       });
 
       await Promise.all([
         prisma.userEvent.update({
-          where: {
-            userId_eventId: { userId: match.user1Id, eventId: match.eventId },
-          },
+          where: { userId_eventId: { userId: match.user1Id, eventId: match.eventId } },
           data: { status: 'ENGAGED' },
         }),
         prisma.userEvent.update({
-          where: {
-            userId_eventId: { userId: match.user2Id, eventId: match.eventId },
-          },
+          where: { userId_eventId: { userId: match.user2Id, eventId: match.eventId } },
           data: { status: 'ENGAGED' },
         }),
       ]);
@@ -106,6 +110,9 @@ export const MatchService = {
       const match = await prisma.match.findUnique({ where: { id: matchId } });
       if (!match) return;
       if (!['PENDING', 'ACTIVE'].includes(match.status)) return;
+
+      // Clean up any in-flight confirmation tracking for this match
+      pendingConfirmations.delete(matchId);
 
       const partnerId =
         match.user1Id === disconnectedUserId ? match.user2Id : match.user1Id;

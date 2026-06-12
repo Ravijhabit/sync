@@ -124,6 +124,6 @@ async function reconnectHandler(socket: SyncSocket, userId: string, eventId: str
   }
 }
 
-export function getIo(): SyncServer {
+export function getIo(): SyncServer | undefined {
   return io;
 }

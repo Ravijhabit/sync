@@ -57,10 +57,12 @@ export class EventTimerService {
   }
 
   private scheduleTimer(delayMs: number, fn: () => Promise<void>) {
-    const t = setTimeout(() => {
-      fn().catch((err) =>
-        logger.error({ type: 'event_timer_error', err })
-      );
+    const t = setTimeout(async () => {
+      try {
+        await fn();
+      } catch (err) {
+        logger.error({ type: 'event_timer_error', err });
+      }
     }, delayMs);
     this.timers.push(t);
   }

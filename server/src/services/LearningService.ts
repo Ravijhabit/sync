@@ -13,7 +13,7 @@ import type {
 type IoType = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
 export const LearningService = {
-  async create(learnerId: string, body: CreateLearningBody, io: IoType) {
+  async create(learnerId: string, body: CreateLearningBody, io: IoType | undefined) {
     return withTelemetry('LearningService', 'create', { matchId: body.matchId }, async () => {
       const match = await prisma.match.findUnique({
         where: { id: body.matchId },
@@ -39,7 +39,7 @@ export const LearningService = {
         },
       });
 
-      io.to(`user:${body.targetId}`).emit('learning:review_ready', { learningId: learning.id });
+      io?.to(`user:${body.targetId}`).emit('learning:review_ready', { learningId: learning.id });
 
       return learning;
     });

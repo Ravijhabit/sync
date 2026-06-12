@@ -13,14 +13,14 @@ const COOKIE_OPTIONS = {
   path: '/',
 };
 
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'], session: false })
+router.get('/google', (req: Request, res: Response, next: NextFunction) =>
+  passport.authenticate('google', { scope: ['profile', 'email'], session: false })(req, res, next)
 );
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: '/?auth=failed' }),
+  (req: Request, res: Response, next: NextFunction) =>
+    passport.authenticate('google', { session: false, failureRedirect: '/?auth=failed' })(req, res, next),
   (req: Request, res: Response, _next: NextFunction) => {
     const user = req.user as User | undefined;
     if (!user) {
