@@ -32,7 +32,7 @@ describe('POST /api/auth/join', () => {
       });
 
     expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({ name: 'Alice', email: 'alice@example.com' });
+    expect(res.body.user).toMatchObject({ name: 'Alice', email: 'alice@example.com' });
     expect(res.headers['set-cookie']).toBeDefined();
     expect(res.headers['set-cookie'][0]).toContain('token=');
     expect(res.headers['set-cookie'][0]).toContain('HttpOnly');
@@ -58,7 +58,7 @@ describe('POST /api/auth/join', () => {
     const r2 = await request(app).post('/api/auth/join').send(body);
     expect(r1.status).toBe(201);
     expect(r2.status).toBe(201);
-    expect(r1.body.id).toBe(r2.body.id);
+    expect(r1.body.user.id).toBe(r2.body.user.id);
   });
 });
 
@@ -108,7 +108,7 @@ describe('GET /api/users/me', () => {
   it('returns user profile with valid cookie', async () => {
     const res = await request(app).get('/api/users/me').set('Cookie', cookie);
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ email: 'charlie@example.com' });
+    expect(res.body.user).toMatchObject({ email: 'charlie@example.com' });
   });
 
   it('returns 401 with no cookie', async () => {

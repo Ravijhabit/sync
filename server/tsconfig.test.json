@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "noUncheckedIndexedAccess": false,
+    "rootDir": "."
+  },
+  "include": ["src/**/*", "prisma/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

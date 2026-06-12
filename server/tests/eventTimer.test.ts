@@ -16,7 +16,8 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-  jest.useFakeTimers();
+  // doNotFake keeps setImmediate/nextTick real so Prisma I/O can proceed
+  jest.useFakeTimers({ doNotFake: ['setImmediate', 'clearImmediate', 'nextTick'] });
   emits.length = 0;
   await cleanDatabase();
 });
@@ -41,21 +42,18 @@ describe('EventTimerService', () => {
     const svc = new EventTimerService(mockIo);
     await svc.init();
 
-    jest.advanceTimersByTime(1_000);
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(1_000);
 
     let dbEvent = await testPrisma.event.findUnique({ where: { id: event.id } });
     expect(dbEvent?.status).toBe('ONGOING');
 
-    jest.advanceTimersByTime(79_000);
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(79_000);
 
     dbEvent = await testPrisma.event.findUnique({ where: { id: event.id } });
     expect(dbEvent?.status).toBe('CLOSING');
     expect(emits.some((e) => e.event === 'event:closing')).toBe(true);
 
-    jest.advanceTimersByTime(120_000);
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(120_000);
 
     dbEvent = await testPrisma.event.findUnique({ where: { id: event.id } });
     expect(dbEvent?.status).toBe('COMPLETED');
@@ -75,8 +73,7 @@ describe('EventTimerService', () => {
     const svc = new EventTimerService(mockIo);
     await svc.init();
 
-    jest.advanceTimersByTime(60_000);
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(60_000);
 
     const dbEvent = await testPrisma.event.findUnique({ where: { id: event.id } });
     expect(dbEvent?.status).toBe('COMPLETED');

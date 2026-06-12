@@ -42,6 +42,15 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.test.json"
+      }
+    },
+    "moduleNameMapper": {
+      "^uuid$": "<rootDir>/tests/__mocks__/uuid.cjs"
+    },
+    "setupFiles": ["<rootDir>/tests/jestSetup.ts"],
     "roots": [
       "<rootDir>/tests"
     ],
