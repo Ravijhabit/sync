@@ -56,10 +56,10 @@ export function NotificationLayer() {
   }, [socket, addNotification, navigate]);
 
   useEffect(() => {
-    notifications.forEach((n) => {
-      const timer = setTimeout(() => removeNotification(n.id), 5000);
-      return () => clearTimeout(timer);
-    });
+    const timers = notifications.map((n) =>
+      setTimeout(() => removeNotification(n.id), 5000)
+    );
+    return () => timers.forEach(clearTimeout);
   }, [notifications, removeNotification]);
 
   return (
