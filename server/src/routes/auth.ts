@@ -12,6 +12,7 @@ const authRateLimit = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env['NODE_ENV'] === 'test',
   message: { error: { code: 'RATE_LIMITED', message: 'Too many requests, please try again later' } },
 });
 
