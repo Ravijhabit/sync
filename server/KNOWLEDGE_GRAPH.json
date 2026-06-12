@@ -1,0 +1,360 @@
+{
+  "$schema": "https://sync-app/knowledge-graph/v1",
+  "description": "Service dependency and data-flow graph for the Sync backend. Nodes represent services, routes, models, socket events, and middleware. Edges represent calls, reads/writes, emits, and guards.",
+  "nodes": {
+    "routes": [
+      { "id": "route:GET/api/health",                                        "file": "src/routes/health.ts",    "auth": false,  "phase": 0  },
+      { "id": "route:POST/api/auth/join",                                    "file": "src/routes/auth.ts",      "auth": false,  "phase": 1, "rateLimit": true },
+      { "id": "route:POST/api/auth/login",                                   "file": "src/routes/auth.ts",      "auth": false,  "phase": 1, "rateLimit": true },
+      { "id": "route:GET/api/auth/google",                                   "file": "src/routes/authGoogle.ts","auth": false,  "phase": 3  },
+      { "id": "route:GET/api/auth/google/callback",                         "file": "src/routes/authGoogle.ts","auth": false,  "phase": 3  },
+      { "id": "route:GET/api/users/me",                                      "file": "src/routes/users.ts",     "auth": true,   "phase": 1  },
+      { "id": "route:GET/api/events",                                        "file": "src/routes/events.ts",    "auth": false,  "phase": 6  },
+      { "id": "route:GET/api/events/:id",                                    "file": "src/routes/events.ts",    "auth": true,   "phase": 6  },
+      { "id": "route:GET/api/events/:id/attendees",                         "file": "src/routes/events.ts",    "auth": true,   "phase": 6  },
+      { "id": "route:GET/api/events/:id/leaderboard",                       "file": "src/routes/events.ts",    "auth": true,   "phase": 12 },
+      { "id": "route:GET/api/events/:eventId/users/:userId/stats",          "file": "src/routes/events.ts",    "auth": true,   "phase": 12 },
+      { "id": "route:GET/api/events/:eventId/users/:userId/ratings/received","file": "src/routes/events.ts",    "auth": true,   "phase": 13 },
+      { "id": "route:GET/api/events/:eventId/users/:userId/ratings/given",   "file": "src/routes/events.ts",    "auth": true,   "phase": 13 },
+      { "id": "route:POST/api/learnings",                                    "file": "src/routes/learnings.ts", "auth": true,   "phase": 11 },
+      { "id": "route:GET/api/learnings/:id",                                 "file": "src/routes/learnings.ts", "auth": true,   "phase": 11 },
+      { "id": "route:PATCH/api/learnings/:id/review",                       "file": "src/routes/learnings.ts", "auth": true,   "phase": 11 },
+      { "id": "route:PATCH/api/matches/:id/meaningful",                     "file": "src/routes/matches.ts",   "auth": true,   "phase": 11 },
+      { "id": "route:POST/api/telemetry",                                    "file": "src/routes/telemetry.ts", "auth": true,   "phase": 2  }
+    ],
+    "services": [
+      {
+        "id": "service:AuthService",
+        "file": "src/services/AuthService.ts",
+        "methods": ["join", "login", "getMe", "verifyToken"]
+      },
+      {
+        "id": "service:OAuthService",
+        "file": "src/services/OAuthService.ts",
+        "methods": ["upsertGoogleUser"]
+      },
+      {
+        "id": "service:EventService",
+        "file": "src/services/EventService.ts",
+        "methods": ["listActive", "getById", "getAttendees"]
+      },
+      {
+        "id": "service:EventTimerService",
+        "file": "src/services/EventTimerService.ts",
+        "methods": ["init", "destroy", "scheduleEvent(private)", "transitionOngoing(private)", "transitionClosing(private)", "transitionCompleted(private)"]
+      },
+      {
+        "id": "service:MatchingEngine",
+        "file": "src/services/MatchingEngine.ts",
+        "methods": ["handleIdle"]
+      },
+      {
+        "id": "service:MatchService",
+        "file": "src/services/MatchService.ts",
+        "methods": ["confirmMatch", "endConversation", "cancelMatch"]
+      },
+      {
+        "id": "service:PromptSelectionService",
+        "file": "src/services/PromptSelectionService.ts",
+        "methods": ["select"]
+      },
+      {
+        "id": "service:UserService",
+        "file": "src/services/UserService.ts",
+        "methods": ["resolveEventId", "setIdle", "setEngaged", "setOffline", "handleDisconnect", "cancelOfflineTimer", "getCurrentState"]
+      },
+      {
+        "id": "service:LearningService",
+        "file": "src/services/LearningService.ts",
+        "methods": ["create", "getById", "review", "setMeaningful"]
+      },
+      {
+        "id": "service:LeaderboardService",
+        "file": "src/services/LeaderboardService.ts",
+        "methods": ["getRanked", "getUserStats", "assertVisible"]
+      },
+      {
+        "id": "service:RatingService",
+        "file": "src/services/RatingService.ts",
+        "methods": ["getReceived", "getGiven"]
+      }
+    ],
+    "middleware": [
+      { "id": "middleware:authMiddleware",  "file": "src/middleware/auth.ts",         "desc": "Verifies JWT from httpOnly cookie; attaches req.auth = { userId, sessionId }" },
+      { "id": "middleware:errorHandler",    "file": "src/middleware/errorHandler.ts", "desc": "Global error handler; maps AppError to { error: { code, message } }" },
+      { "id": "middleware:passport",        "file": "src/middleware/passport.ts",     "desc": "Registers GoogleStrategy; skips if GOOGLE_CLIENT_ID absent" },
+      { "id": "middleware:rateLimitAuth",   "file": "src/routes/auth.ts",            "desc": "express-rate-limit: max 10 req/IP/min on /api/auth/*" },
+      { "id": "middleware:socketAuth",      "file": "src/socket/server.ts",          "desc": "Verifies JWT from cookie in socket handshake; attaches socket.data.{ userId, sessionId }" }
+    ],
+    "models": [
+      { "id": "model:User",               "table": "users",               "file": "prisma/schema.prisma" },
+      { "id": "model:Event",              "table": "events",              "file": "prisma/schema.prisma" },
+      { "id": "model:UserEvent",          "table": "user_events",         "file": "prisma/schema.prisma" },
+      { "id": "model:Match",              "table": "matches",             "file": "prisma/schema.prisma" },
+      { "id": "model:ConversationPrompt", "table": "conversation_prompts","file": "prisma/schema.prisma" },
+      { "id": "model:Learning",           "table": "learnings",           "file": "prisma/schema.prisma" }
+    ],
+    "socketEvents": {
+      "serverToClient": [
+        { "id": "socket:s2c:match:found",           "payload": "{ matchId, partnerHints: { partnerId, role, company, interests }, prompt: { id, text, followUp, category, depth, energy } }" },
+        { "id": "socket:s2c:match:partner_ready",   "payload": "{ matchId }" },
+        { "id": "socket:s2c:match:active",          "payload": "{ matchId, prompt }" },
+        { "id": "socket:s2c:match:ended",           "payload": "{ matchId }" },
+        { "id": "socket:s2c:match:cancelled",       "payload": "{ matchId }" },
+        { "id": "socket:s2c:user:offline",          "payload": "{ userId }" },
+        { "id": "socket:s2c:learning:review_ready", "payload": "{ learningId }" },
+        { "id": "socket:s2c:event:closing",         "payload": "{ eventId, secondsRemaining: 120 }" },
+        { "id": "socket:s2c:event:completed",       "payload": "{ eventId }" }
+      ],
+      "clientToServer": [
+        { "id": "socket:c2s:user:set_idle",        "payload": "{ userId }" },
+        { "id": "socket:c2s:user:found_partner",   "payload": "{ matchId }" },
+        { "id": "socket:c2s:user:end_conversation","payload": "{ matchId }" }
+      ]
+    },
+    "utils": [
+      { "id": "util:withTelemetry",    "file": "src/utils/withTelemetry.ts",    "desc": "Wraps any async fn with service_start/service_end Pino log entries; generates operationId UUID" },
+      { "id": "util:sanitizeForLog",   "file": "src/utils/sanitizeForLog.ts",   "desc": "Strips PII fields (name, email, company, bio, interests, content, justification, feedback) before logging" },
+      { "id": "util:logger",           "file": "src/utils/logger.ts",           "desc": "Pino instance; JSON in production, pino-pretty in dev" },
+      { "id": "util:AppError",         "file": "src/utils/AppError.ts",         "desc": "Typed error class; carries statusCode + code + message; caught by errorHandler middleware" },
+      { "id": "util:asyncHandler",     "file": "src/utils/asyncHandler.ts",     "desc": "Wraps async route handlers to forward rejections to next()" }
+    ]
+  },
+  "edges": [
+    { "comment": "──── Routes → Services ────────────────────────────────────────────────────────" },
+    { "from": "route:POST/api/auth/join",                                     "to": "service:AuthService",        "relation": "calls", "method": "join"            },
+    { "from": "route:POST/api/auth/login",                                    "to": "service:AuthService",        "relation": "calls", "method": "login"           },
+    { "from": "route:GET/api/users/me",                                       "to": "service:AuthService",        "relation": "calls", "method": "getMe"           },
+    { "from": "route:GET/api/auth/google/callback",                           "to": "service:OAuthService",       "relation": "calls", "method": "upsertGoogleUser"},
+    { "from": "route:GET/api/events",                                         "to": "service:EventService",       "relation": "calls", "method": "listActive"      },
+    { "from": "route:GET/api/events/:id",                                     "to": "service:EventService",       "relation": "calls", "method": "getById"         },
+    { "from": "route:GET/api/events/:id/attendees",                          "to": "service:EventService",       "relation": "calls", "method": "getAttendees"    },
+    { "from": "route:GET/api/events/:id/leaderboard",                        "to": "service:LeaderboardService", "relation": "calls", "method": "assertVisible + getRanked" },
+    { "from": "route:GET/api/events/:eventId/users/:userId/stats",           "to": "service:LeaderboardService", "relation": "calls", "method": "getUserStats"    },
+    { "from": "route:GET/api/events/:eventId/users/:userId/ratings/received","to": "service:RatingService",      "relation": "calls", "method": "getReceived"     },
+    { "from": "route:GET/api/events/:eventId/users/:userId/ratings/given",   "to": "service:RatingService",      "relation": "calls", "method": "getGiven"        },
+    { "from": "route:POST/api/learnings",                                     "to": "service:LearningService",    "relation": "calls", "method": "create"          },
+    { "from": "route:GET/api/learnings/:id",                                  "to": "service:LearningService",    "relation": "calls", "method": "getById"         },
+    { "from": "route:PATCH/api/learnings/:id/review",                        "to": "service:LearningService",    "relation": "calls", "method": "review"          },
+    { "from": "route:PATCH/api/matches/:id/meaningful",                      "to": "service:LearningService",    "relation": "calls", "method": "setMeaningful"   },
+
+    { "comment": "──── Middleware → Routes (guards) ────────────────────────────────────────────" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/users/me",                                       "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/events/:id",                                     "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/events/:id/attendees",                          "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/events/:id/leaderboard",                        "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/events/:eventId/users/:userId/stats",           "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/events/:eventId/users/:userId/ratings/received","relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/events/:eventId/users/:userId/ratings/given",   "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:POST/api/learnings",                                     "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:GET/api/learnings/:id",                                  "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:PATCH/api/learnings/:id/review",                        "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:PATCH/api/matches/:id/meaningful",                      "relation": "guards" },
+    { "from": "middleware:authMiddleware", "to": "route:POST/api/telemetry",                                     "relation": "guards" },
+    { "from": "middleware:rateLimitAuth",  "to": "route:POST/api/auth/join",                                     "relation": "guards" },
+    { "from": "middleware:rateLimitAuth",  "to": "route:POST/api/auth/login",                                    "relation": "guards" },
+    { "from": "middleware:socketAuth",     "to": "socket:c2s:user:set_idle",                                     "relation": "guards" },
+    { "from": "middleware:socketAuth",     "to": "socket:c2s:user:found_partner",                                "relation": "guards" },
+    { "from": "middleware:socketAuth",     "to": "socket:c2s:user:end_conversation",                             "relation": "guards" },
+
+    { "comment": "──── Socket Events → Services (triggers) ──────────────────────────────────────" },
+    { "from": "socket:c2s:user:set_idle",         "to": "service:MatchingEngine", "relation": "triggers", "method": "handleIdle"       },
+    { "from": "socket:c2s:user:found_partner",    "to": "service:MatchService",   "relation": "triggers", "method": "confirmMatch"     },
+    { "from": "socket:c2s:user:end_conversation", "to": "service:MatchService",   "relation": "triggers", "method": "endConversation"  },
+    { "from": "socket:disconnect",                "to": "service:UserService",    "relation": "triggers", "method": "handleDisconnect" },
+
+    { "comment": "──── Services → Socket Events (emits) ────────────────────────────────────────" },
+    { "from": "service:MatchingEngine",    "to": "socket:s2c:match:found",           "relation": "emits", "room": "user:<userId> + user:<candidateId>" },
+    { "from": "service:MatchService",      "to": "socket:s2c:match:partner_ready",   "relation": "emits", "room": "user:<partnerId>" },
+    { "from": "service:MatchService",      "to": "socket:s2c:match:active",          "relation": "emits", "room": "user:<user1Id> + user:<user2Id>" },
+    { "from": "service:MatchService",      "to": "socket:s2c:match:ended",           "relation": "emits", "room": "user:<user1Id> + user:<user2Id>" },
+    { "from": "service:MatchService",      "to": "socket:s2c:match:cancelled",       "relation": "emits", "room": "user:<partnerId>" },
+    { "from": "service:UserService",       "to": "socket:s2c:user:offline",          "relation": "emits", "room": "user:<userId>" },
+    { "from": "service:LearningService",   "to": "socket:s2c:learning:review_ready", "relation": "emits", "room": "user:<targetId>" },
+    { "from": "service:EventTimerService", "to": "socket:s2c:event:closing",         "relation": "emits", "room": "event:<eventId>" },
+    { "from": "service:EventTimerService", "to": "socket:s2c:event:completed",       "relation": "emits", "room": "event:<eventId>" },
+
+    { "comment": "──── Service → Service (calls) ────────────────────────────────────────────────" },
+    { "from": "service:MatchingEngine",  "to": "service:PromptSelectionService", "relation": "calls", "method": "select"           },
+    { "from": "service:MatchingEngine",  "to": "service:UserService",            "relation": "calls", "method": "setIdle (via DB)" },
+    { "from": "service:UserService",     "to": "service:MatchService",           "relation": "calls", "method": "cancelMatch"      },
+
+    { "comment": "──── Services → Models (reads / writes) ──────────────────────────────────────" },
+    { "from": "service:AuthService",          "to": "model:User",               "relation": "reads+writes" },
+    { "from": "service:AuthService",          "to": "model:UserEvent",          "relation": "writes" },
+    { "from": "service:OAuthService",         "to": "model:User",               "relation": "reads+writes" },
+    { "from": "service:EventService",         "to": "model:Event",              "relation": "reads" },
+    { "from": "service:EventService",         "to": "model:UserEvent",          "relation": "reads" },
+    { "from": "service:EventService",         "to": "model:User",               "relation": "reads" },
+    { "from": "service:EventTimerService",    "to": "model:Event",              "relation": "reads+writes" },
+    { "from": "service:UserService",          "to": "model:UserEvent",          "relation": "reads+writes" },
+    { "from": "service:UserService",          "to": "model:Match",              "relation": "reads" },
+    { "from": "service:UserService",          "to": "model:Event",              "relation": "reads" },
+    { "from": "service:MatchingEngine",       "to": "model:Event",              "relation": "reads" },
+    { "from": "service:MatchingEngine",       "to": "model:UserEvent",          "relation": "reads+writes" },
+    { "from": "service:MatchingEngine",       "to": "model:Match",              "relation": "reads+writes", "note": "wrapped in prisma.$transaction" },
+    { "from": "service:MatchingEngine",       "to": "model:User",               "relation": "reads" },
+    { "from": "service:MatchService",         "to": "model:Match",              "relation": "reads+writes", "note": "cancelMatch + endConversation wrapped in prisma.$transaction" },
+    { "from": "service:MatchService",         "to": "model:UserEvent",          "relation": "writes" },
+    { "from": "service:PromptSelectionService","to": "model:ConversationPrompt","relation": "reads" },
+    { "from": "service:PromptSelectionService","to": "model:Match",             "relation": "reads", "note": "counts completed matches to determine depth eligibility" },
+    { "from": "service:LearningService",      "to": "model:Learning",           "relation": "reads+writes" },
+    { "from": "service:LearningService",      "to": "model:Match",              "relation": "reads+writes" },
+    { "from": "service:LeaderboardService",   "to": "model:Learning",           "relation": "reads", "note": "raw SQL Bayesian query — only raw SQL allowed in this service" },
+    { "from": "service:LeaderboardService",   "to": "model:Match",              "relation": "reads" },
+    { "from": "service:LeaderboardService",   "to": "model:UserEvent",          "relation": "reads" },
+    { "from": "service:LeaderboardService",   "to": "model:User",               "relation": "reads" },
+    { "from": "service:LeaderboardService",   "to": "model:Event",              "relation": "reads" },
+    { "from": "service:RatingService",        "to": "model:Learning",           "relation": "reads" },
+    { "from": "service:RatingService",        "to": "model:Event",              "relation": "reads" },
+
+    { "comment": "──── Utils → Services (wraps) ─────────────────────────────────────────────────" },
+    { "from": "util:withTelemetry",  "to": "service:AuthService",          "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:OAuthService",         "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:EventService",         "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:UserService",          "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:MatchingEngine",       "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:MatchService",         "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:PromptSelectionService","relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:LearningService",      "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:LeaderboardService",   "relation": "wraps" },
+    { "from": "util:withTelemetry",  "to": "service:RatingService",        "relation": "wraps" }
+  ],
+  "flows": {
+    "userJoin": {
+      "description": "New user joins event via email form",
+      "steps": [
+        "POST /api/auth/join",
+        "middleware:rateLimitAuth → allow",
+        "AuthService.join",
+        "  → prisma.user.create (or findUnique if duplicate)",
+        "  → prisma.userEvent.upsert",
+        "  → jwt.sign { userId, sessionId, exp:24h }",
+        "← Set-Cookie: token=<jwt>; HttpOnly; SameSite=Strict",
+        "← 201 { user, sessionId }"
+      ]
+    },
+    "googleOAuth": {
+      "description": "User signs in with Google",
+      "steps": [
+        "GET /api/auth/google → passport redirects to Google",
+        "GET /api/auth/google/callback (with code)",
+        "  → OAuthService.upsertGoogleUser",
+        "  → prisma.user.findUnique or create",
+        "  → update avatarUrl if changed",
+        "  → jwt.sign { userId, sessionId, exp:24h }",
+        "← Set-Cookie: token=<jwt>; HttpOnly",
+        "← 302 redirect to CLIENT_URL"
+      ]
+    },
+    "matchmaking": {
+      "description": "User goes idle and gets matched",
+      "steps": [
+        "socket:c2s:user:set_idle",
+        "middleware:socketAuth → verified",
+        "MatchingEngine.handleIdle(userId, eventId)",
+        "  → Check event.status !== CLOSING/COMPLETED",
+        "  → prisma.userEvent.update status=IDLE",
+        "  → Fetch all IDLE UserEvents for event (excluding self)",
+        "  → Filter out prior match pairs (re-match prevention)",
+        "  → Pick random candidate",
+        "  → PromptSelectionService.select(userA, userB, eventId)",
+        "    → Filter by audience + depth eligibility + exclude used prompts",
+        "    → Score by tag overlap → top-3 random pick",
+        "  → prisma.$transaction: create Match + set both UserEvents ENGAGED",
+        "← socket:s2c:match:found to user:<userId> AND user:<candidateId>"
+      ]
+    },
+    "confirmMatch": {
+      "description": "Both users confirm the match",
+      "steps": [
+        "socket:c2s:user:found_partner { matchId }",
+        "MatchService.confirmMatch(matchId, userId)",
+        "  → Emit match:partner_ready to partner",
+        "  → If both confirmed → prisma.match.update status=ACTIVE",
+        "  → prisma.userEvent.update both ENGAGED",
+        "← socket:s2c:match:active to both users"
+      ]
+    },
+    "endConversation": {
+      "description": "User ends the conversation",
+      "steps": [
+        "socket:c2s:user:end_conversation { matchId }",
+        "MatchService.endConversation(matchId, userId)",
+        "  → prisma.$transaction: Match→COMPLETED, both UserEvents→IDLE",
+        "← socket:s2c:match:ended to both users"
+      ]
+    },
+    "submitLearning": {
+      "description": "User submits a learning after conversation",
+      "steps": [
+        "POST /api/learnings { matchId, targetId, content, justification }",
+        "middleware:authMiddleware → verified req.auth",
+        "LearningService.create(learnerId, body, io)",
+        "  → Check event.status !== COMPLETED",
+        "  → Check no duplicate (matchId + learnerId unique)",
+        "  → prisma.learning.create",
+        "  → io.to('user:<targetId>').emit('learning:review_ready')",
+        "← 201 Learning record"
+      ]
+    },
+    "eventLifecycle": {
+      "description": "Automatic event status transitions on server start",
+      "steps": [
+        "Server start → EventTimerService.init()",
+        "  → Query all non-COMPLETED events",
+        "  → For each event, schedule timers from now:",
+        "    UPCOMING + startTime > now  → setTimeout → ONGOING",
+        "    (UPCOMING|ONGOING) + endTime-2min > now → setTimeout → CLOSING + emit event:closing",
+        "    (UPCOMING|ONGOING|CLOSING) + endTime > now → setTimeout → COMPLETED + emit event:completed",
+        "← socket:s2c:event:closing { eventId, secondsRemaining: 120 } to event:<eventId>",
+        "← socket:s2c:event:completed { eventId } to event:<eventId>"
+      ]
+    },
+    "disconnectWhileEngaged": {
+      "description": "User disconnects while in active conversation",
+      "steps": [
+        "socket:disconnect event",
+        "UserService.handleDisconnect(userId, eventId, io)",
+        "  → UserEvent.status === ENGAGED",
+        "  → Find active Match for this user",
+        "  → MatchService.cancelMatch(matchId, userId, io)",
+        "    → prisma.$transaction: Match→CANCELLED, partner UserEvent→IDLE",
+        "← socket:s2c:match:cancelled to user:<partnerId>"
+      ]
+    },
+    "leaderboard": {
+      "description": "Fetch ranked leaderboard (only visible at CLOSING or COMPLETED)",
+      "steps": [
+        "GET /api/events/:eventId/leaderboard",
+        "middleware:authMiddleware → verified",
+        "LeaderboardService.assertVisible(eventId)",
+        "  → 403 if event.status === ONGOING",
+        "LeaderboardService.getRanked(eventId, page, limit)",
+        "  → Raw SQL Bayesian score: (C×m + Σratings) / (C+n), C=3",
+        "← 200 { entries: LeaderboardRow[], total, page, limit }"
+      ]
+    }
+  },
+  "indexes": [
+    { "model": "UserEvent", "columns": ["event_id", "status"],           "purpose": "Fetch IDLE users in an event — hits on every user:set_idle" },
+    { "model": "Learning",  "columns": ["target_id"],                    "purpose": "Leaderboard join: ratings received by a user" },
+    { "model": "Match",     "columns": ["event_id"],                     "purpose": "Scope matches to event" },
+    { "model": "Match",     "columns": ["event_id", "user1_id", "user2_id"], "purpose": "Re-match prevention check" },
+    { "model": "Learning",  "columns": ["match_id"],                     "purpose": "Learning lookup by match" }
+  ],
+  "constraints": [
+    { "model": "UserEvent", "type": "unique", "columns": ["userId", "eventId"], "purpose": "One participation record per user per event" },
+    { "model": "Learning",  "type": "unique", "columns": ["matchId", "learnerId"], "purpose": "Prevent duplicate learning submissions per match" }
+  ],
+  "securityGates": [
+    { "check": "event.status !== COMPLETED",           "enforced_in": ["LearningService.create", "LearningService.review", "LearningService.setMeaningful"], "error": "403 EVENT_COMPLETED" },
+    { "check": "event.status === CLOSING|COMPLETED",   "enforced_in": ["LeaderboardService.assertVisible"], "error": "403 LEADERBOARD_HIDDEN" },
+    { "check": "event.status !== ONGOING|CLOSING",     "enforced_in": ["RatingService.getReceived"],       "error": "403 RATINGS_HIDDEN" },
+    { "check": "event.status !== CLOSING|COMPLETED",   "enforced_in": ["MatchingEngine.handleIdle"],       "error": "null — silent reject" },
+    { "check": "learning.targetId === req.auth.userId","enforced_in": ["LearningService.review"],          "error": "403 FORBIDDEN" },
+    { "check": "match participantId === req.auth.userId","enforced_in": ["LearningService.setMeaningful"], "error": "403 FORBIDDEN" },
+    { "check": "learning.learnerId|targetId === userId","enforced_in": ["LearningService.getById"],       "error": "403 FORBIDDEN" },
+    { "check": "valid JWT in httpOnly cookie",          "enforced_in": ["middleware:authMiddleware", "middleware:socketAuth"], "error": "401 UNAUTHORIZED" }
+  ]
+}
